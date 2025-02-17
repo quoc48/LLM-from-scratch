@@ -77,3 +77,5 @@ class GPTDatasetV1(Dataset):
     # Return a single row from the dataset
     def __getitem__(self, idx):
         return self.input_ids[idx], self.target_ids[idx]
+    
+# A data loader to generate batches with input_with pairs

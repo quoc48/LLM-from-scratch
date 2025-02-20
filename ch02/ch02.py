@@ -37,23 +37,6 @@ class SimpleTokenizerV2:
         text = re.sub(r'\s+([,.:;?!"()\'])', r'\1', text)
         return text
 
-
-# Byte pair encoding
-tokenizer = tiktoken.get_encoding("gpt2")
-with open("the-verdict.txt", "r", encoding="utf-8") as f:
-    raw_text = f.read()
-
-enc_text = tokenizer.encode(raw_text)
-print(len(enc_text))
-
-enc_sample = enc_text[50:]
-
-context_size = 4  # determine how many tokens are included in the input
-for i in range(1, context_size+1):
-    context = enc_sample[:i]
-    desired = enc_sample[i]
-    print(tokenizer.decode(context), "---->", tokenizer.decode([desired]))
-
 # A dataset for batched inputs and targets
 class GPTDatasetV1(Dataset):
     def __init__(self, txt, tokenizer, max_length, stride):
@@ -79,3 +62,35 @@ class GPTDatasetV1(Dataset):
         return self.input_ids[idx], self.target_ids[idx]
     
 # A data loader to generate batches with input_with pairs
+def create_dataloader_v1(txt, batch_size=4, max_length=256, 
+                         stride=128, shuffle=True, drop_last=True,
+                         num_workers=0):
+
+    # Initialize the tokenizer
+    tokenizer = tiktoken.get_encoding("gpt2")
+
+    # Create dataset
+    dataset = GPTDatasetV1(txt, tokenizer, max_length, stride)
+
+    # Create dataloader
+    dataloader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        drop_last=drop_last,
+        num_workers=num_workers
+    )
+
+    return dataloader
+
+with open("the-verdict.txt", "r", encoding="utf-8") as f:
+    raw_text = f.read()
+
+dataloader = create_dataloader_v1(
+    raw_text, batch_size=8, max_length=4, stride=2, shuffle=False
+)
+
+data_iter = iter(dataloader)
+inputs, targets = next(data_iter)
+print("Inputs:\n", inputs)
+print("\nTargets:\n", targets)

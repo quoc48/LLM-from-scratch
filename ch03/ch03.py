@@ -9,29 +9,20 @@ inputs = torch.tensor(
      [0.05, 0.80, 0.55]] # step     (x^6)
 )
 
-query = inputs[1] # 2nd input token is the query
-attn_scores_2 = torch.empty(inputs.shape[0])
-for i, x_i in enumerate(inputs):
-    attn_scores_2[i] = torch.dot(x_i, query)    # dot product
-print(attn_scores_2)
+# Step 1: compute all attention scores
+attn_scores = torch.empty(6,6)
+attn_scores = inputs @ inputs.T # Replace the for loop in Python for inceasing performance
+print(attn_scores)
 
-# normalize the unnormalized attention scores so that they sum up to 1
-attn_weights_2_tmp = attn_scores_2 / attn_scores_2.sum()
+# Step 2: compute all attention weights
+attn_weights = torch.softmax(attn_scores, dim=-1)
+print(attn_weights)
 
-print("Attention weights: ", attn_weights_2_tmp)
-print("Sum: ", attn_weights_2_tmp.sum())
+# Verify the row indeeded sum to 1
+row_2_sum = sum([0.1385, 0.2379, 0.2333, 0.1240, 0.1082, 0.1581])
+print("Row 2 sum:", row_2_sum)
+print("All row sums:", attn_weights.sum(dim=-1))
 
-# Count softmax
-attn_weights_2 = torch.softmax(attn_scores_2, dim=0)
-
-print("Attention weights:", attn_weights_2)
-print("Sum:", attn_weights_2.sum())
-
-# Obtain the attention score for 2nd query
-query = inputs[1]   # 2nd input token is the query
-context_vec_2 = torch.zeros(query.shape)
-for i, x_i in enumerate(inputs):    # i:index ; x_i:element(vector)
-    context_vec_2 += attn_weights_2[i]*x_i
-
-print(context_vec_2)
-
+# Step 3: compute all context vector
+all_context_vecs = attn_weights @ inputs
+print(all_context_vecs)

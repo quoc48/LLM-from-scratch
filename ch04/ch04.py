@@ -234,10 +234,10 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
 start_context = "Hello, I am"
 
 encoded = tokenizer.encode(start_context)
-print("encoded:", encoded)
+#print("encoded:", encoded)
 
 encoded_tensor = torch.tensor(encoded).unsqueeze(0)
-print("encoded_tensor.shape:", encoded_tensor.shape)
+#print("encoded_tensor.shape:", encoded_tensor.shape)
 
 model.eval()    # disable dropout
 
@@ -247,7 +247,7 @@ out = generate_text_simple(
     max_new_tokens=6, 
     context_size=GPT_CONFIG_124M["context_length"]
 )
-print("Output:", out)
-print("Output length:", len(out[0]))
+#print("Output:", out)
+#print("Output length:", len(out[0]))
 decoded_text = tokenizer.decode(out.squeeze(0).tolist())
-print(decoded_text)
+#print(decoded_text)
